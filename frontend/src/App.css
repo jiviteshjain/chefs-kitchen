@@ -1,38 +1,219 @@
-.App {
-  text-align: center;
+/* GENERAL */
+:root {
+	--blue: #22264b;
+	--rust: #b56969;
+	--yellow: #e6cf8b;
+	--lavender: #e8edf3;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+	font-family: 'Quicksand', sans-serif;
+	font-size: 1.2rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+body a {
+	text-decoration: none !important;
+	color: unset !important;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+body a:hover {
+	text-decoration: none !important;
+	color: unset !important;
 }
 
-.App-link {
-  color: #61dafb;
+body Link {
+	color: unset !important;
+	text-decoration: none !important;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+body Link:hover {
+	text-decoration: none !important;
+	color: unset !important;
+}
+
+.btn:hover {
+	color: unset !important;
+}
+
+.shadow {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
+		0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.shadow-move {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+	transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+}
+
+.shadow-move:hover {
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+.btn {
+	border-radius: 500px;
+	font-family: 'Barlow Condensed', sans-serif;
+	text-transform: uppercase;
+}
+
+.full-height {
+	height: 100vh;
+}
+
+.bg-yellow {
+	color: black;
+	background-color: var(--yellow);
+}
+
+.bg-rust {
+	color: white;
+	background-color: var(--rust);
+}
+
+.bg-blue {
+	color: white;
+	background-color: var(--blue);
+}
+
+.bg-lavender {
+	color: black;
+	background-color: var(--lavender);
+}
+
+.line-yellow {
+	border: 2px solid var(--yellow);
+	color: var(--yellow);
+}
+
+.line-yellow:hover {
+	color: black !important;
+	background-color: var(--yellow) !important;
+}
+
+.line-rust {
+	border: 2px solid var(--rust);
+	color: var(--rust);
+}
+
+.line-rust:hover {
+	color: white !important;
+	background-color: var(--rust) !important;
+}
+
+.line-blue {
+	border: 2px solid var(--blue);
+	color: var(--blue);
+}
+
+.line-blue:hover {
+	color: white !important;
+	background-color: var(--blue) !important;
+}
+
+.line-lavender {
+	border: 2px solid var(--lavender);
+	color: var(--lavender);
+}
+
+.line-lavender:hover {
+	color: black !important;
+	background-color: var(--lavender) !important;
+}
+
+/* LANDING */
+.landing-nav {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 700;
+	font-size: 1.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.4rem;
+}
+
+.home-screen {
+	height: 100vh;
+	background: linear-gradient(0deg, rgba(255, 255, 255, 0.192), rgba(255, 255, 255, 0.678)), url('./assets/landing.jpg');
+	background-size: cover;
+	background-position-y: 60%;
+}
+
+.home-screen-main h1 {
+	font-family: 'Barlow', sans-serif;
+	line-height: 5.3rem;
+	font-size: 7rem;
+	font-weight: 1000;
+	/* text-transform: uppercase; */
+} 
+
+
+.page-title {
+	font-family: "Barlow", sans-serif;
+	font-size: 3rem;
+	color: var(--dark-grey);
+}
+
+.status-bar {
+	color: black !important;
+	font-family: 'Barlow Condensed', sans-serif;
+}
+
+/* HEADER */
+
+.head {
+	font-family: 'Barlow', sans-serif;
+	font-weight: 800;
+	font-size: 4rem;
+	color: black;
+}
+
+/* LANDING */
+.big-text {
+	font-family: 'Barlow', sans-serif;
+	font-weight: 800;
+	font-size: 7rem;
+	color: var(--dark-grey);
+}
+
+.small-text {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 400;
+	font-size: 2rem;
+	color: var(--red);
+}
+
+/* REGISTRATION */
+.form-error {
+	font-size: 0.9rem;
+	font-weight: bold;
+	color: var(--red);
+}
+
+/* DASHBOARD */
+.card-pic {
+	max-width: 200px;
+}
+
+/* CUSTOMER SEARCH */
+/* .add-on .input-group-btn>.btn {
+  border-left-width: 0;
+  left: -2px;
+  box-shadow: inset 0 2px 2px rgba(0, 0, 0, 0.246);
+  
+}
+
+
+.add-on .form-control:focus {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  border-color: #cccccc;
+} */
+
+.has-search .form-control-feedback {
+	position: absolute;
+	z-index: 2;
+	display: block;
+	width: 2.375rem;
+	height: 2.375rem;
+	line-height: 2.375rem;
+	text-align: center;
+	pointer-events: none;
+	color: #aaa;
 }
