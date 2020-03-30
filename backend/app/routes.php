@@ -66,5 +66,199 @@ return function (App $app) {
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
             });
         });
+
+        $group->group('/users', function (Group $group) {
+            $group->get('/me', function (Request $request, Response $response) {
+                if (!$request->hasHeader('Authorization')) {
+                    $error_array = array('detail' => 'Authorization header required');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $auth_header = $request->getHeader('Authorization');
+                global $CHEF_CLIENT;
+                $chef_response = $CHEF_CLIENT->get('users/me', [
+                    'headers' => [
+                        'Authorization' => $auth_header,
+                    ],
+                ]);
+                error_log((string)$chef_response->getBody());
+                if (!$chef_response->getStatusCode() == 200) {
+                    $error_array = array('detail' => 'API call failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_SERVER_ERROR);
+                }
+
+                $chef_data = json_decode((string)$chef_response->getBody(), true);
+                $response->getBody()->write((string)json_encode($chef_data));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
+
+            });
+        });
+
+        $group->group('/contests', function (Group $group) {
+            $group->get('/all', function (Request $request, Response $response) {
+                if (!$request->hasHeader('Authorization')) {
+                    $error_array = array('detail' => 'Authorization header required');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+                $auth_header = $request->getHeader('Authorization');
+                global $CHEF_CLIENT;
+                $chef_response = $CHEF_CLIENT->get('contests', [
+                    'headers' => [
+                        'Authorization' => $auth_header,
+                    ],
+                    'query' => [
+                        'fields' => 'code,name',
+                        'status' => 'present'
+                    ]
+                ]);
+
+                error_log((string)$chef_response->getBody());
+                if (!$chef_response->getStatusCode() == 200) {
+                    $error_array = array('detail' => 'API call failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_SERVER_ERROR);
+                }
+
+                $chef_data = json_decode((string)$chef_response->getBody(), true);
+                $response->getBody()->write((string)json_encode($chef_data));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
+
+            });
+
+            $group->get('/detail/{code}', function (Request $request, Response $response, $args) {
+
+                if (!$request->hasHeader('Authorization')) {
+                    $error_array = array('detail' => 'Authorization header required');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $auth_header = $request->getHeader('Authorization');
+                $code = $args['code'];
+                $data = [];
+                global $CHEF_CLIENT;
+
+                // contest details request
+                $query_string = 'contests/' . (string)$code;
+                $chef_response = $CHEF_CLIENT->get($query_string, [
+                    'headers' => [
+                        'Authorization' => $auth_header,
+                    ],
+                    'query' => [
+                        'fields' => 'code,name,startDate,endDate,type,freezingTime,problemsList',
+                    ]
+                ]);
+
+                if (!$chef_response->getStatusCode() == 200) {
+                    $error_array = array('detail' => 'API call failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $data['contest'] = json_decode((string)$chef_response->getBody(), true);
+
+                // submission details
+                $chef_response = $CHEF_CLIENT->get('submissions', [
+                    'headers' => [
+                        'Authorization' => $auth_header,
+                    ],
+                    'query' => [
+                        'fields' => 'id,date,username,problemCode,language,contestCode,result,time,memory',
+                        'contestCode' => (string)$code,
+                    ]
+                ]);
+
+                if (!$chef_response->getStatusCode() == 200) {
+                    $error_array = array('detail' => 'API call failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $data['submissions'] = json_decode((string)$chef_response->getBody(), true);
+
+                // rank details
+                $query_string = 'rankings/' . (string)$code;
+                $chef_response = $CHEF_CLIENT->get($query_string, [
+                    'headers' => [
+                        'Authorization' => $auth_header,
+                    ],
+                    'query' => [
+                        'fields' => 'rank,username,totalTime,penalty,country,countryCode,institution,rating,institutionType,contestId,contestCode,totalScore,problemScore',
+                        'sortBy' => 'rank',
+                    ]
+                ]);
+
+                if (!$chef_response->getStatusCode() == 200) {
+                    $error_array = array('detail' => 'API call failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $data['ranks'] = json_decode((string)$chef_response->getBody(), true);
+
+                $response->getBody()->write((string)json_encode($data));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
+
+            });
+
+            $group->get('/{contest_code}/problems/{problem_code}', function(Request $request, Response $response, $args) {
+                if (!$request->hasHeader('Authorization')) {
+                    $error_array = array('detail' => 'Authorization header required');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $auth_header = $request->getHeader('Authorization');
+                $contest_code = $args['contest_code'];
+                $problem_code = $args['problem_code'];
+                $data = [];
+                global $CHEF_CLIENT;
+
+                // get problem details
+                $query_string = 'contests/' . (string)$contest_code . '/problems/' . (string)$problem_code;
+                $chef_response = $CHEF_CLIENT->get($query_string, [
+                    'headers' => [
+                        'Authorization' => $auth_header,
+                    ],
+                    'query' => [
+                        'fields' => 'problemCode,author,problemName,languagesSupported,sourceSizeLimit,dateAdded,challengeType,maxTimeLimit,successfulSubmissions,body,totalSubmissions,partialSubmissions,tags'
+                    ]
+                ]);
+                
+                if (!$chef_response->getStatusCode() == 200) {
+                    $error_array = array('detail' => 'API call failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $data['problem'] = json_decode((string)$chef_response->getBody(), true);
+
+                // get submission details
+                $chef_response = $CHEF_CLIENT->get('submissions', [
+                    'headers' => [
+                        'Authorization' => $auth_header,
+                    ],
+                    'query' => [
+                        'fields' => 'id,date,username,problemCode,language,contestCode,result,time,memory',
+                        'contestCode' => (string)$contest_code,
+                        'problemCode' => (string)$problem_code,
+                    ]
+                ]);
+
+                if (!$chef_response->getStatusCode() == 200) {
+                    $error_array = array('detail' => 'API call failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $data['submissions'] = json_decode((string)$chef_response->getBody(), true);
+
+                $response->getBody()->write((string)json_encode($data));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
+            });
+        });
     });
 };

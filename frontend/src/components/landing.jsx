@@ -5,7 +5,7 @@ import conf from "../config";
 
 export default class Landing extends React.Component {
     render() {
-        const LOGIN_URL = conf.CHEF_LOGIN_API + "?response_type=code&client_id=" + conf.CHEF_CLIENT_ID + "&state=" + conf.CHEF_STATE + "&redirect_uri=" + conf.FRONT_BASE_URL + conf.SELF_REDIRECT_URL
+        const LOGIN_URL = conf.CHEF_BASE_URL + "/oauth/authorize" + "?response_type=code&client_id=" + conf.CHEF_CLIENT_ID + "&state=" + conf.CHEF_STATE + "&redirect_uri=" + conf.FRONT_BASE_URL + "/auth/login/middle";
         return (
             <React.Fragment>
                 <div className="container-fluid home-screen d-flex flex-column">
