@@ -14,6 +14,8 @@ import conf from "../config";
 import PageTitle from "./page-title";
 import Error from "./error";
 import Loading from "./loading";
+import HeadBar from "./head-bar";
+import StatusBar from "./status-bar";
 
 export default class ContestPage extends React.Component {
     constructor(props) {
@@ -122,6 +124,8 @@ export default class ContestPage extends React.Component {
         const endDate = moment(this.state.contest.endDate).format('MMMM Do YYYY, h:mm:ss a');
         return (
             <React.Fragment>
+                <HeadBar/>
+                <StatusBar/>
                 <PageTitle normal="Contest " bold={this.state.contest.code} />
                 <div className="container mb-5">
                     <div className="row">

@@ -13,6 +13,8 @@ import IllustrImg from "../assets/select-contest.svg";
 import PageTitle from "./page-title";
 import Error from "./error";
 import Loading from "./loading";
+import HeadBar from "./head-bar";
+import StatusBar from "./status-bar";
 
 export default class SelectContest extends React.Component {
     constructor(props) {
@@ -120,6 +122,8 @@ export default class SelectContest extends React.Component {
 
         return (
             <React.Fragment>
+                <HeadBar/>
+                <StatusBar/>
                 <PageTitle normal="Choose a " bold="Contest" />
                 <div className="container">
                     <div className="row">

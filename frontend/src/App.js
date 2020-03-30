@@ -19,6 +19,7 @@ class App extends React.Component {
 			isLoggedIn: false,
 		}
 		this.handleLogin = this.handleLogin.bind(this);
+		this.handleLogout = this.handleLogout.bind(this);
 	}
 
 	componentWillMount() {
@@ -56,6 +57,21 @@ class App extends React.Component {
 		localStorage.setItem("user", JSON.stringify(user));
 	}
 
+	handleLogout() {
+		this.setState({
+			isLoggedIn: false,
+		});
+		if (localStorage) {
+			localStorage.removeItem("accessToken");
+			localStorage.removeItem("refreshToken");
+			localStorage.removeItem("tokenType");
+			localStorage.removeItem("expiresIn");
+			localStorage.removeItem("loginTimeStamp");
+			localStorage.removeItem("user");
+		}
+		return <Redirect to="/"/>
+	}
+
 	render() {
 		return (
 			<Router>
@@ -66,6 +82,8 @@ class App extends React.Component {
 				<Route exact path="/start" component={SelectContest} />
 				<Route exact path="/contest" component={ContestPage} />
 				<Route exact path="/problem" component={ProblemPage} />
+				
+				<Route exact path="/auth/logout" render={this.handleLogout} />
 			</Router>
 		);
 	}

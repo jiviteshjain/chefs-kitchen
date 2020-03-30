@@ -15,6 +15,8 @@ import "primeicons/primeicons.css";
 import PageTitle from "./page-title";
 import Error from "./error";
 import Loading from "./loading";
+import HeadBar from "./head-bar";
+import StatusBar from "./status-bar";
 
 export default class ProblemPage extends React.Component {
     constructor(props) {
@@ -211,6 +213,8 @@ export default class ProblemPage extends React.Component {
 
         return (
             <React.Fragment>
+                <HeadBar />
+                <StatusBar/>
                 <PageTitle normal="Problem " bold={this.state.problem.problemCode} />
                 <div className="container mb-5">
                     <div className="row">
