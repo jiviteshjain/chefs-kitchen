@@ -13,12 +13,15 @@ import "primeicons/primeicons.css";
 
 
 import PageTitle from "./page-title";
+import Error from "./error";
+import Loading from "./loading";
 
 export default class ProblemPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             isError: false,
+            isLoaded: false,
 
             problem: {
                 languagesSupported: [],
@@ -61,6 +64,7 @@ export default class ProblemPage extends React.Component {
             this.setState({
                 problem: response.data.problem.result.data.content,
                 submissions: response.data.submissions.result.data.content,
+                isLoaded: true,
             });
         }).catch((error) => {
             if (error) {
@@ -119,7 +123,7 @@ export default class ProblemPage extends React.Component {
                 isRunning: true,
                 chefLink: response.data.result.data.link
             });
-            setTimeout(this.pollRun(), 5000);
+            setTimeout(() => {this.pollRun()}, 5000);
         }).catch((error) => {
             if (error) {
                 this.setState({
@@ -174,6 +178,19 @@ export default class ProblemPage extends React.Component {
     }
 
     render() {
+
+        if (this.state.isError) {
+            return (
+                <Error />
+            );
+        }
+
+        if (!this.state.isLoaded) {
+            return (
+                <Loading />
+            )
+        }
+
         return (
             <React.Fragment>
                 <PageTitle normal="Problem " bold={this.state.problem.problemCode} />

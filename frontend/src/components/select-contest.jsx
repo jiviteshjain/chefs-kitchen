@@ -11,12 +11,15 @@ import conf from "../config";
 import IllustrImg from "../assets/select-contest.svg";
 
 import PageTitle from "./page-title";
+import Error from "./error";
+import Loading from "./loading";
 
 export default class SelectContest extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             isError: false,
+            isLoaded: false,
 
             fullContestList: [],
             suggestContestList: null,
@@ -43,7 +46,8 @@ export default class SelectContest extends React.Component {
                 contest.extendedName = contest.code + " - " + contest.name;
             }
             this.setState({
-                fullContestList: contestList 
+                fullContestList: contestList,
+                isLoaded: true,
             });
             console.log(contestList);
         }).catch((error) => {
@@ -90,6 +94,19 @@ export default class SelectContest extends React.Component {
     }
 
     render() {
+
+        if (this.state.isError) {
+            return (
+                <Error/>
+            );
+        }
+
+        if (!this.state.isLoaded) {
+            return (
+                <Loading/>
+            )
+        }
+
         return (
             <React.Fragment>
                 <PageTitle normal="Choose a " bold="Contest" />
@@ -108,7 +125,8 @@ export default class SelectContest extends React.Component {
                                 suggestions={this.state.suggestContestList}
                                 completeMethod={this.autoComplete}
                                 dropdown={true}
-                                dropdownMode="current"
+                                dropdownMode="current" 
+                                placeholder="Select Contest"
                             />
                         </div>
                     </div>

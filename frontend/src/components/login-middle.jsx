@@ -6,6 +6,8 @@ import queryString from "query-string";
 import conf from "../config";
 import LoadingImg from "../assets/login-loading.svg";
 
+import Error from "./error";
+
 export default class LoginMiddle extends React.Component {
     constructor(props) {
         super(props);
@@ -92,6 +94,12 @@ export default class LoginMiddle extends React.Component {
     }
 
     render() {
+
+        if (this.state.isError) {
+            return (
+                <Error/>
+            );
+        }
         return (
             <React.Fragment>
                 <div className="container full-height">
@@ -106,17 +114,6 @@ export default class LoginMiddle extends React.Component {
                         </div>
                     </div>
                 </div>
-                {
-                    this.state.isError &&
-                    <div className="alert alert-danger bg-rust alert-pos shadow-move" role="alert">
-                        <h4 className="alert-heading">Uh oh!</h4>
-                        <p>Something went wrong while logging you in! It's not you, it's us, and while we try to figure out what's going on, we'll redirect you back so you can try again.</p>
-                        <hr />
-                        <div className="mb-0 d-flex justify-content-end">
-                            <button className="btn shadow-move bg-lavender" onClick={this.handleButtonClick}>Try Again</button>
-                        </div>
-                    </div>
-                }
             </React.Fragment>
             
         );

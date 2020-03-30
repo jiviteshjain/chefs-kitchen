@@ -12,11 +12,17 @@ import "primeicons/primeicons.css";
 
 import conf from "../config";
 import PageTitle from "./page-title";
+import Error from "./error";
+import Loading from "./loading";
 
 export default class ContestPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+
+            isError: false,
+            isLoaded: false,
+
             submissions: [],
             contest: {},
             ranks: [],
@@ -45,6 +51,7 @@ export default class ContestPage extends React.Component {
                 contest: response.data.contest.result.data.content,
                 ranks: response.data.ranks.result.data.content,
                 problemList: response.data.contest.result.data.content.problemsList,
+                isLoaded: true,
             });
         }).catch((error) => {
             if (error) {
@@ -76,23 +83,18 @@ export default class ContestPage extends React.Component {
 
     render() {
 
-        // const rankTable = this.state.ranks.map((rank, i) => {
-        //     return (
-        //         <tr>
-        //             <td>{rank.rank}</td>
-        //             <td>{rank.username}</td>
-        //             <td>{rank.country}</td>
-        //             <td>{rank.totalScore}</td>
-        //         </tr>
-        //     );
-        // });
+        if (this.state.isError) {
+            return (
+                <Error/>
+            );
+        }
 
-        // const rankHeader = (
-        //     <div style={{ 'textAlign': 'left' }}>
-        //         <i className="pi pi-search" style={{ margin: '4px 4px 0 0' }}></i>
-        //         <input type="search" className="form-control" onChange={(e) => this.setState({ rankFilter: e.target.value })} placeholder="Search" size="50" />
-        //     </div>
-        // );
+        if (!this.state.isLoaded) {
+            return (
+                <Loading/>
+            )
+        }
+
         const problemList = this.state.problemList.map((prob, i) => {
             return (
                 <div className="card shadow-move my-1">
