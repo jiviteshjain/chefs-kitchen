@@ -260,5 +260,107 @@ return function (App $app) {
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
             });
         });
+
+        $group->group('/ide', function(Group $group) {
+            $group->post('/run', function(Request $request, Response $response) {
+                if (!$request->hasHeader('Authorization')) {
+                    $error_array = array('detail' => 'Authorization header required');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+                $auth_header = $request->getHeader('Authorization');
+
+                $parsedBody = $request->getParsedBody();
+                error_log((string)json_encode($parsedBody));
+                
+                if (!$parsedBody || !array_key_exists('code', $parsedBody)) {
+                    $error_array = ['detail' => 'Field \'code\' not found'];
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+                $code = $parsedBody['code'];
+
+                if (!$parsedBody || !array_key_exists('lang', $parsedBody)) {
+                    $error_array = ['detail' => 'Field \'lang\' not found'];
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+                $lang = $parsedBody['lang'];
+
+                if (!$parsedBody || !array_key_exists('input', $parsedBody)) {
+                    $error_array = ['detail' => 'Field \'input\' not found'];
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $input = $parsedBody['input'];
+
+                global $CHEF_CLIENT;
+                $chef_response = $CHEF_CLIENT->post('ide/run', [
+                    'headers' => [
+                        'Authorization' => $auth_header,
+                    ],
+                    'json' => [
+                        'sourceCode' => $code,
+                        'language' => $lang,
+                        'input' => $input
+                    ]
+                ]);
+
+                if (!$chef_response->getStatusCode() == 200) {
+                    $error_array = array('detail' => 'API call failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $chef_data = json_decode((string)$chef_response->getBody(), true);
+                $response->getBody()->write((string)json_encode($chef_data));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
+
+
+            });
+
+            $group->post('/status', function (Request $request, Response $response) {
+                if (!$request->hasHeader('Authorization')) {
+                    $error_array = array('detail' => 'Authorization header required');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+                $auth_header = $request->getHeader('Authorization');
+
+                $parsedBody = $request->getParsedBody();
+                error_log((string)json_encode($parsedBody));
+                
+                if (!$parsedBody || !array_key_exists('link', $parsedBody)) {
+                    $error_array = ['detail' => 'Field \'link\' not found'];
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+                $link = $parsedBody['link'];
+
+
+                global $CHEF_CLIENT;
+
+                $chef_response = $CHEF_CLIENT->get('ide/status', [
+                    'headers' => [
+                        'Authorization' => $auth_header,
+                    ],
+                    'query' => [
+                        'link' => (string)$link
+                    ]
+                ]);
+                
+                if (!$chef_response->getStatusCode() == 200) {
+                    $error_array = array('detail' => 'API call failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $chef_data = json_decode((string)$chef_response->getBody(), true);
+                $response->getBody()->write((string)json_encode($chef_data));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
+
+            });
+        });
     });
 };

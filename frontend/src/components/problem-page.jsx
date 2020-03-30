@@ -3,11 +3,15 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import axios from "axios";
 import queryString from "query-string";
 import { DataTable, Column } from 'primereact/datatable';
+import { Dropdown } from 'primereact/dropdown';
 import Countdown from "react-countdown";
 import moment from "moment";
+import Editor from "react-simple-code-editor"
 import "primereact/resources/themes/nova-colored/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
+
+
 import PageTitle from "./page-title";
 
 export default class ProblemPage extends React.Component {
@@ -23,9 +27,22 @@ export default class ProblemPage extends React.Component {
             submissions: [],
 
             subFilter: null,
+            
+            codeText: "",
+            selectedLanguage: null,
+            codeInput: null,
+            codeOutput: null,
+            isRunning: false,
+            chefLink: null,
+            runResult: null
         };
 
         this.handleSubChange = this.handleSubChange.bind(this);
+        this.handleEditorChange = this.handleEditorChange.bind(this);
+        this.handleLanguageChange = this.handleLanguageChange.bind(this);
+        this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleRun = this.handleRun.bind(this);
+        this.pollRun = this.pollRun.bind(this);
     }
 
     componentDidMount() {
@@ -64,6 +81,96 @@ export default class ProblemPage extends React.Component {
         this.setState({
             subFilter: e.target.value
         });
+    }
+
+    handleEditorChange(code) {
+        this.setState({
+            codeText: code
+        });
+    }
+
+    handleInputChange(e) {
+        this.setState({
+            codeInput: e.target.value
+        });
+    }
+
+    handleLanguageChange(e) {
+        this.setState({
+            selectedLanguage: e.value
+        });
+    }
+
+    handleRun(e) {
+        alert("Your code is running! Please wait while we finish cooking.");
+        axios({
+            method: "POST",
+            url: "/api/ide/run",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            data: {
+                code: this.state.codeText,
+                lang: this.state.selectedLanguage,
+                input: this.state.codeInput
+            }
+        }).then((response) => {
+            this.setState({
+                isRunning: true,
+                chefLink: response.data.result.data.link
+            });
+            setTimeout(this.pollRun(), 5000);
+        }).catch((error) => {
+            if (error) {
+                this.setState({
+                    isError: true
+                });
+                console.log(error);
+                if (error.response) {
+                    console.log(error.response.data);
+                }
+            }
+        });
+    }
+
+    pollRun() {
+        if (!this.state.isRunning) {
+            return;
+        }
+
+        axios({
+            method: "POST",
+            url: "/api/ide/status",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            data: {
+                link: this.state.chefLink
+            }
+        }).then((response) => {
+            console.log(response);
+            this.setState({
+                runResult: response.data.result.data,
+                codeOutput: response.data.result.data.output,
+                isRunning: false
+            })
+        }).catch({
+            if(error) {
+                this.setState({
+                    isError: true
+                });
+                console.log(error);
+                if (error.response) {
+                    console.log(error.response.data);
+                }
+            }
+        });
+
+    }
+
+    handleSubmit(e) {
+        e.preventDefault();
+        alert("Your code has been submitted!");
     }
 
     render() {
@@ -147,6 +254,90 @@ export default class ProblemPage extends React.Component {
                                     </DataTable>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="container">
+                    <div className="row">
+                        <div className="col-12 text-center">
+                            <h3 className="section-title">IDE</h3>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-12 col-lg-6 mb-5 mb-lg-0">
+                            <div className="container_editor_area">
+                                <Editor
+                                    value={this.state.codeText}
+                                    onValueChange={this.handleEditorChange}
+                                    highlight={code => { return code; }}
+                                    padding={10}
+                                    style={{
+                                        fontFamily: 'monospace',
+                                        fontSize: 12,
+                                        wordWrap: "normal",
+                                        whiteSpace: "nowrap"
+                                    }}
+                                    className="container__editor"
+                                    placeholder="# Get set code"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="col-12 col-lg-6 side-box">
+                            <div className="row my-2">
+                                <div className="col-12 d-flex justify-content-center">
+                                    <Dropdown value={this.state.selectedLanguage} options={this.state.problem.languagesSupported} onChange={this.handleLanguageChange} placeholder="Select language" />
+                                </div>
+                            </div>
+                            <div className="row my-2">
+                                <div className="col-12">
+                                    <textarea className="form-control" rows="3" placeholder="Custom Input" value={this.state.codeInput} onChange={this.handleInputChange}/>
+                                </div>
+                            </div>
+                            <div className="row my-2">
+                                <div className="col-12">
+                                    <textarea className="form-control" readOnly={true} rows="3" placeholder="Output" value={this.state.codeOutput}/>
+                                </div>
+                            </div>
+                            <div className="row my-2">
+                                <div className="col-6 text-center">
+                                    <button className="btn bg-yellow shadow-move w-50" onClick={this.handleRun}>Run</button>
+                                </div>
+                                <div className="col-6 text-center">
+                                    <button className="btn bg-rust shadow-move w-50" onClick={this.handleSubmit}>Submit</button>
+                                </div>
+                            </div>
+                            {
+                                this.state.runResult &&
+                                <div className="card shadow">
+                                    <div className="card-header">
+                                        Run Details
+                                </div>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item">
+                                            <span className="text-muted">Time</span><br />
+                                            <span className="">{this.state.runResult.time}</span>
+                                        </li>
+                                        <li className="list-group-item">
+                                            <span className="text-muted">Memory</span><br />
+                                            <span>{this.state.runResult.memory}</span>
+                                        </li>
+                                        <li className="list-group-item">
+                                            <span className="text-muted">Signal</span><br />
+                                            <span>{this.state.runResult.signal}</span>
+                                        </li>
+                                        <li className="list-group-item">
+                                            <span className="text-muted">Standard Error</span><br />
+                                            <span>{this.state.runResult.stderr}</span>
+                                        </li>
+                                        <li className="list-group-item">
+                                            <span className="text-muted">CMP Information</span><br />
+                                            <span>{this.state.runResult.cmpinfo}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
