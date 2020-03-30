@@ -37,7 +37,9 @@ export default class ProblemPage extends React.Component {
             codeOutput: null,
             isRunning: false,
             chefLink: null,
-            runResult: null
+            runResult: null,
+
+            formError: {},
         };
 
         this.handleSubChange = this.handleSubChange.bind(this);
@@ -106,6 +108,22 @@ export default class ProblemPage extends React.Component {
     }
 
     handleRun(e) {
+
+        if (this.state.selectedLanguage == null) {
+            const formError = Object.assign({}, this.state.formError);
+            formError["language"] = "Please select a language."
+            this.setState({
+                formError: formError,
+            });
+            return;
+        }
+
+        const formError = Object.assign({}, this.state.formError);
+        delete formError.language;
+        this.setState({
+            formError: formError,
+        });
+
         alert("Your code is running! Please wait while we finish cooking.");
         axios({
             method: "POST",
@@ -303,8 +321,12 @@ export default class ProblemPage extends React.Component {
 
                         <div className="col-12 col-lg-6 side-box">
                             <div className="row my-2">
-                                <div className="col-12 d-flex justify-content-center">
+                                <div className="col-12 d-flex justify-content-center align-items-center flex-column">
                                     <Dropdown value={this.state.selectedLanguage} options={this.state.problem.languagesSupported} onChange={this.handleLanguageChange} placeholder="Select language" />
+                                    {
+                                        this.state.formError.language &&
+                                        <p className="form-error">{this.state.formError.language}</p>
+                                    }
                                 </div>
                             </div>
                             <div className="row my-2">
@@ -327,10 +349,10 @@ export default class ProblemPage extends React.Component {
                             </div>
                             {
                                 this.state.runResult &&
-                                <div className="card shadow">
+                                <div className="card shadow mb-5">
                                     <div className="card-header">
                                         Run Details
-                                </div>
+                                    </div>
                                     <ul className="list-group list-group-flush">
                                         <li className="list-group-item">
                                             <span className="text-muted">Time</span><br />

@@ -23,7 +23,9 @@ export default class SelectContest extends React.Component {
 
             fullContestList: [],
             suggestContestList: null,
-            selectedContest: null
+            selectedContest: null,
+
+            formError: {},
         }
 
         this.autoComplete = this.autoComplete.bind(this);
@@ -85,6 +87,15 @@ export default class SelectContest extends React.Component {
     handleButtonClick(e) {
         e.preventDefault()
 
+        if (this.state.selectedContest == null) {
+            const formError = Object.assign({}, this.state.formError);
+            formError["contest"] = "Please select a contest."
+            this.setState({
+                formError: formError,
+            });
+            return;
+        }
+
         this.props.history.push({
             pathname: "/contest",
             state: {
@@ -117,7 +128,7 @@ export default class SelectContest extends React.Component {
                         </div>
                     </div>
                     <div className="row">
-                        <div className="col-12 d-flex justify-content-center align-items-center">
+                        <div className="col-12 d-flex justify-content-center align-items-center flex-column">
                             <AutoComplete
                                 field="extendedName"
                                 value={this.state.selectedContest}
@@ -125,9 +136,13 @@ export default class SelectContest extends React.Component {
                                 suggestions={this.state.suggestContestList}
                                 completeMethod={this.autoComplete}
                                 dropdown={true}
-                                dropdownMode="current" 
+                                dropdownMode="blank" 
                                 placeholder="Select Contest"
                             />
+                            {
+                                this.state.formError.contest &&
+                                <p className="form-error">{this.state.formError.contest}</p>
+                            }
                         </div>
                     </div>
                     <div className="row mt-4">

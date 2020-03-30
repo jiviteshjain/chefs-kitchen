@@ -119,6 +119,12 @@ body Link:hover {
 	background-color: var(--lavender) !important;
 }
 
+.form-error {
+	font-size: 0.9rem;
+	font-weight: bold;
+	color: var(--rust);
+}
+
 .alert-pos {
 	position: absolute;
 	top: 0;
