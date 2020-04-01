@@ -10,6 +10,7 @@ import Editor from "react-simple-code-editor"
 import "primereact/resources/themes/nova-colored/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
+import Markdown from "react-markdown";
 
 
 import PageTitle from "./page-title";
@@ -224,7 +225,9 @@ export default class ProblemPage extends React.Component {
                                     {this.state.problem.problemName}
                                 </div>
                                 <div className="card-body">
-                                    <div className="card-text" dangerouslySetInnerHTML={{__html: this.state.problem.body}}>
+                                    {/* <div className="card-text" dangerouslySetInnerHTML={{__html: this.state.problem.body}}> */}
+                                    <div className="card-text">
+                                       <Markdown escapeHtml={false} source={this.state.problem.body}/> 
                                     </div>
                                 </div>
                             </div>
