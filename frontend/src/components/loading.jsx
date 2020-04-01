@@ -1,4 +1,5 @@
 import React from "react";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 import conf from "../config";
 import LoadingImg from "../assets/loading.svg";
@@ -13,7 +14,7 @@ export default class Loading extends React.Component {
                         <img src={LoadingImg} height="200" className="img my-5" />
                         <p className="text-center text-muted small">
                             Please wait while we load this page.<br />
-                            If this is taking way too long, try refreshing the page or logging out and back in.
+                            If this is taking way too long, try <a onClick={e => window.location.reload()} className="inline-link">refreshing the page</a> or <Link to="/auth/logout" className="inline-link">logging out</Link> and back in.
                         </p>
                     </div>
                 </div>

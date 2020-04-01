@@ -148,6 +148,12 @@ body Link:hover {
 	z-index: 100;
 }
 
+.inline-link {
+	cursor: pointer !important;
+	text-decoration: underline !important;
+	color: var(--rust) !important;
+}
+
 /* LANDING */
 .landing-nav {
 	font-family: 'Barlow Condensed', sans-serif;

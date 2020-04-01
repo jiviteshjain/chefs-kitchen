@@ -2,19 +2,19 @@ import React from "react";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 import conf from "../config";
-import ErrorImg from "../assets/error.svg";
+import ErrorImg from "../assets/404.svg";
 
-export default class Error extends React.Component {
+export default class NotFound extends React.Component {
     render() {
         return (
             <div className="container full-height">
                 <div className="row h-100">
                     <div className="col-12 h-100 d-flex flex-column justify-content-center align-items-center">
-                        <h3>Uh Oh! We smell smoke :(</h3>
+                        <h3>That's the wrong recipe!</h3>
                         <img src={ErrorImg} height="200" className="img my-5" />
                         <p className="text-center text-muted small">
-                            Looks like something is wrong.<br />
-                            Try <a onClick={e => window.location.reload()} className="inline-link">refreshing the page</a> or <Link to="/auth/logout" className="inline-link">logging out</Link> and back in.
+                            This page does not exist.<br />
+                            You may want to <Link to="/" className="inline-link">go home</Link>.
                         </p>
                     </div>
                 </div>

@@ -19,19 +19,43 @@ $CHEF_CLIENT = new Client([
 
 return function (App $app) { 
 
-    $app->get('/', function (Request $request, Response $response) {
-        $response->getBody()->write('Hello world!');
-        return $response;
-    });
-
-    $app->group('/users', function (Group $group) {
-        $group->get('', ListUsersAction::class);
-        $group->get('/{id}', ViewUserAction::class);
-    });
-
     $app->group('/api', function (Group $group) {
         
         $group->group('/auth', function (Group $group) {
+
+            $group->post('/refresh', function(Request $request, Response $response) {
+
+                $parsedBody = $request->getParsedBody();
+                if (!$parsedBody || !array_key_exists('token', $parsedBody)) {
+                    $error_array = ['detail' => 'Field \'token\' not found'];
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                }
+
+                $refresh_token = $parsedBody['token'];
+
+                global $CHEF_CLIENT;
+                $chef_response = $CHEF_CLIENT->post('oauth/token', [
+                    'json' => [
+                        'grant_type' => 'refresh_token',
+                        'refresh_token' => $refresh_token,
+                        'client_id' => CHEF_CLIENT_ID,
+                        'client_secret' => CHEF_CLIENT_SECRET,
+                    ]
+                ]);
+
+                if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
+                    $error_array = array('detail' => 'Authorization Failed');
+                    $response->getBody()->write((string)json_encode($error_array));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
+                }
+
+
+                $chef_data = json_decode((string)$chef_response->getBody(), true);
+                $response->getBody()->write((string)json_encode($chef_data));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
+            });
 
             $group->post('/login/middle', function (Request $request, Response $response) {
                 $parsedBody = $request->getParsedBody();
@@ -56,9 +80,10 @@ return function (App $app) {
                 ]);
 
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
                     $error_array = array('detail' => 'Authorization Failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_FORBIDDEN);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $chef_data = json_decode((string)$chef_response->getBody(), true);
@@ -84,9 +109,10 @@ return function (App $app) {
                 ]);
                 error_log((string)$chef_response->getBody());
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
                     $error_array = array('detail' => 'API call failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_SERVER_ERROR);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $chef_data = json_decode((string)$chef_response->getBody(), true);
@@ -117,9 +143,10 @@ return function (App $app) {
 
                 error_log((string)$chef_response->getBody());
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
                     $error_array = array('detail' => 'API call failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_SERVER_ERROR);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $chef_data = json_decode((string)$chef_response->getBody(), true);
@@ -151,11 +178,13 @@ return function (App $app) {
                         'fields' => 'code,name,startDate,endDate,type,freezingTime,problemsList',
                     ]
                 ]);
-
+                error_log("here");
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
+                    error_log($chef_resp_code);
                     $error_array = array('detail' => 'API call failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $data['contest'] = json_decode((string)$chef_response->getBody(), true);
@@ -172,9 +201,10 @@ return function (App $app) {
                 ]);
 
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
                     $error_array = array('detail' => 'API call failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $data['submissions'] = json_decode((string)$chef_response->getBody(), true);
@@ -192,13 +222,14 @@ return function (App $app) {
                 ]);
 
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
                     $error_array = array('detail' => 'API call failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $data['ranks'] = json_decode((string)$chef_response->getBody(), true);
-
+                error_log("success");
                 $response->getBody()->write((string)json_encode($data));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_OK);
 
@@ -229,9 +260,10 @@ return function (App $app) {
                 ]);
                 
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
                     $error_array = array('detail' => 'API call failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $data['problem'] = json_decode((string)$chef_response->getBody(), true);
@@ -249,9 +281,10 @@ return function (App $app) {
                 ]);
 
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
                     $error_array = array('detail' => 'API call failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $data['submissions'] = json_decode((string)$chef_response->getBody(), true);
@@ -308,9 +341,10 @@ return function (App $app) {
                 ]);
 
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
                     $error_array = array('detail' => 'API call failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $chef_data = json_decode((string)$chef_response->getBody(), true);
@@ -351,9 +385,10 @@ return function (App $app) {
                 ]);
                 
                 if (!$chef_response->getStatusCode() == 200) {
+                    $chef_resp_code = $chef_response->getStatusCode();
                     $error_array = array('detail' => 'API call failed');
                     $response->getBody()->write((string)json_encode($error_array));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(HTTP_BAD_REQUEST);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus($chef_resp_code);
                 }
 
                 $chef_data = json_decode((string)$chef_response->getBody(), true);

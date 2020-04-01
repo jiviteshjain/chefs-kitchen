@@ -5,12 +5,14 @@ import axios from "axios";
 import conf from "./config";
 import "./App.css";
 import setAuthToken from "./set-auth-token";
+import createInterceptor from "./interceptor";
 
 import Landing from "./components/landing";
 import LoginMiddle from "./components/login-middle";
 import SelectContest from "./components/select-contest";
 import ContestPage from "./components/contest-page";
 import ProblemPage from "./components/problem-page";
+import NotFound from "./components/404.jsx";
 
 class App extends React.Component {
 	constructor(props) {
@@ -18,6 +20,7 @@ class App extends React.Component {
 		this.state = {
 			isLoggedIn: false,
 		}
+		createInterceptor();
 		this.handleLogin = this.handleLogin.bind(this);
 		this.handleLogout = this.handleLogout.bind(this);
 	}
@@ -75,15 +78,18 @@ class App extends React.Component {
 	render() {
 		return (
 			<Router>
-				<Route exact path="/" component={Landing}/>
-				<Route exact path="/auth/login/middle" render={
-					(props) => <LoginMiddle {...props} callBack={this.handleLogin} />}/>
+				<Switch>
+					<Route exact path="/" component={Landing}/>
+					<Route exact path="/auth/login/middle" render={
+						(props) => <LoginMiddle {...props} callBack={this.handleLogin} />}/>
 
-				<Route exact path="/start" component={SelectContest} />
-				<Route exact path="/contest" component={ContestPage} />
-				<Route exact path="/problem" component={ProblemPage} />
-				
-				<Route exact path="/auth/logout" render={this.handleLogout} />
+					<Route exact path="/start" component={SelectContest} />
+					<Route exact path="/contest" component={ContestPage} />
+					<Route exact path="/problem" component={ProblemPage} />
+					
+					<Route exact path="/auth/logout" render={this.handleLogout} />
+					<Route path="" component={NotFound}/>
+				</Switch>
 			</Router>
 		);
 	}
